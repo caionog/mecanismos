@@ -1,0 +1,30 @@
+# Maven / Java
+target/
+*.log
+*.class
+*.jar
+
+# IDEs
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# VSCode
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Maven wrapper
+/.mvn/
+/.mvn/wrapper/maven-wrapper.jar
+
+# Local environment
+application.yml.local
+.env

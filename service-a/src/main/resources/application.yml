@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: service-a
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      serviceB:
+        register-health-indicator: true
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 5
+        minimum-number-of-calls: 3
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+  retry:
+    instances:
+      serviceB:
+        max-attempts: 2
+        wait-duration: 500ms
+  bulkhead:
+    instances:
+      serviceB:
+        maxConcurrentCalls: 2
+        maxWaitDuration: 0
+
+logging:
+  level:
+    io.github.resilience4j.circuitbreaker: DEBUG
+    org.springframework.web.client.RestTemplate: DEBUG
