@@ -15,10 +15,14 @@ import io.github.resilience4j.decorators.Decorators;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import java.util.function.Supplier;
 import java.util.Collections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/")
 public class ForwardController {
+
+    private static final Logger log = LoggerFactory.getLogger(ForwardController.class);
 
     @Autowired
     private RestTemplate restTemplate;
@@ -30,6 +34,7 @@ public class ForwardController {
     @Retry(name = CB_NAME, fallbackMethod = "fallback") // RETRY
     @CircuitBreaker(name = CB_NAME, fallbackMethod = "fallback")
     public String forward() {
+        log.info("forward(): calling service-b via RestTemplate");
         String url = "http://service-b:8080/process";
         return restTemplate.getForObject(url, String.class);
     }
@@ -45,12 +50,19 @@ public class ForwardController {
         CircuitBreaker circuitBreaker = registry.circuitBreaker("decoratorCB");
 
         // 3) Decorate a functional interface (Supplier)
-        Supplier<String> supplier = () -> restTemplate.getForObject(url, String.class);
+        Supplier<String> supplier = () -> {
+            log.info("decorated supplier: calling service-b at {}", url);
+            String resp = restTemplate.getForObject(url, String.class);
+            log.info("decorated supplier: received response: {}", resp);
+            return resp;
+        };
 
         Supplier<String> decorated = Decorators.ofSupplier(supplier)
                 .withCircuitBreaker(circuitBreaker)
-                .withFallback(Collections.singletonList(CallNotPermittedException.class),
-                        throwable -> "fallback-decorated: " + throwable.getClass().getSimpleName() + ": " + throwable.getMessage())
+                .withFallback(Collections.singletonList(CallNotPermittedException.class), throwable -> {
+                    log.warn("decorator fallback triggered: {}", throwable.toString());
+                    return "fallback-decorated: " + throwable.getClass().getSimpleName() + ": " + throwable.getMessage();
+                })
                 .decorate();
 
         // 4) Recover from exception when executing
@@ -62,6 +74,7 @@ public class ForwardController {
     }
 
     public String fallback(Throwable ex) {
+        log.warn("fallback() invoked: {}", ex.toString());
         return "fallback: service-b is unavailable -> " + ex.getClass().getSimpleName() + ": " + ex.getMessage();
     }
 }

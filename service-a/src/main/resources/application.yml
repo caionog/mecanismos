@@ -29,4 +29,12 @@ resilience4j:
 logging:
   level:
     io.github.resilience4j.circuitbreaker: DEBUG
+    io.github.resilience4j.retry: DEBUG
+    io.github.resilience4j.bulkhead: DEBUG
     org.springframework.web.client.RestTemplate: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,metrics"
