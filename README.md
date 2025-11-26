@@ -9,8 +9,10 @@ Estrutura:
 
 Como rodar (PowerShell):
 
+Nota: execute os comandos a partir da raiz do projeto (a pasta que contém `docker-compose.yml`).
+
 ```powershell
-cd "C:/Users/Educação/Desktop/Facul/Mecanismos de Tolerância a Falhas/mecanismos"
+# A partir da raiz do projeto
 mvn -f service-b clean package -DskipTests
 mvn -f service-a clean package -DskipTests
 docker-compose build
@@ -27,15 +29,6 @@ curl http://localhost:8080/forward
 # Reiniciar
 docker-compose start service-b
 ```
-O que falta / pontos a ajustar
-
-Build dos JARs: Executar mvn -f service-b clean package -DskipTests e mvn -f service-a clean package -DskipTests antes de docker-compose build. Os Dockerfile fazem COPY target/*.jar, portanto precisam dos JARs gerados.
-Dependências locais: Ter JDK 17 e Maven instalados na máquina de desenvolvimento para rodar os comandos Maven.
-Docker e Docker Compose: Ter Docker Desktop / Docker Engine e Docker Compose instalados para usar docker-compose build e docker-compose up.
-Healthcheck do service-b: docker-compose.yml usa CMD-SHELL curl -f http://localhost:8080/actuator/health || exit 1 dentro do container. A imagem base (eclipse-temurin:17-jdk-jammy) provavelmente não tem curl instalado — o healthcheck falhará até instalar curl. É necessário:
-Instalar curl no Dockerfile (ex.: apt-get update; apt-get install -y curl) OU
-Mudar o healthcheck para um comando presente no container (se houver) ou para testar externamente.
-Possível dependência faltante (se ocorrer erro de compilação): Se o build falhar por não encontrar @CircuitBreaker, adicione explicitamente io.github.resilience4j:resilience4j-circuitbreaker:1.7.1 no pom.xml. (Normalmente resilience4j-spring-boot2 cobre isso, mas em alguns casos é necessário declarar o módulo de circuito.)
 
 Checklist Rápido — Pré-requisitos
 
@@ -45,14 +38,16 @@ Docker: Instalar Docker Desktop / Docker Engine.
 Docker Compose: Disponível via Docker Desktop (ou docker-compose).
 (Opcional) curl: Ter curl no host para testes; note que o container precisa de curl para o healthcheck (veja observação).
 
-Ir para a raiz do projeto:
-cd "C:/Users/Educação/Desktop/Facul/Mecanismos de Tolerância a Falhas/mecanismos"
+Ir para a raiz do projeto
+
+Abra um terminal na raiz do repositório (a pasta que contém `docker-compose.yml`) e execute os passos abaixo.
+
 Gerar os JARs (necessário antes do build das imagens):
+
+```powershell
 mvn -f service-b clean package -DskipTests
 mvn -f service-a clean package -DskipTests
-# Mecanismos — demo Resilience4j
-
-Projeto didático com dois serviços Spring Boot que demonstram mecanismos de tolerância a falhas usando Resilience4j: Circuit Breaker, Retry e Bulkhead.
+```
 
 Estrutura do repositório
 - `service-a` — cliente que chama `service-b` e aplica Resilience4j (anotações e exemplo com decorators)
@@ -66,11 +61,7 @@ Pré-requisitos
 
 Quick start (PowerShell)
 
-1. Vá para a raiz do projeto:
-
-```powershell
-cd "C:/Users/Educação/Desktop/Facul/Mecanismos de Tolerância a Falhas/mecanismos"
-```
+1. Abra um terminal na raiz do projeto (a pasta que contém `docker-compose.yml`).
 
 2. Gerar os JARs (necessário antes de build das imagens):
 
