@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.client.RestTemplate;
-import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import java.util.function.Supplier;
@@ -29,7 +28,6 @@ public class ForwardController {
 
     @GetMapping("forward")
     @Bulkhead(name = CB_NAME) //BULKHEAD
-    @Retry(name = CB_NAME, fallbackMethod = "fallback") // RETRY
     @CircuitBreaker(name = CB_NAME, fallbackMethod = "fallback")
     public String forward(@RequestParam(value = "mode", required = false) String mode) {
         log.info("forward(): calling service-b via RestTemplate (mode={})", mode);
